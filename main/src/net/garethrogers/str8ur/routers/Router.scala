@@ -4,6 +4,7 @@ import net.garethrogers.str8ur.HttpRequest
 import net.garethrogers.str8ur.HttpResponse
 
 trait Router:
-  println("Top level Router code")
-  
-  def getRouteFor(uri: String): HttpRequest => HttpResponse
+  def initRouter: Unit =
+    println("If you are seeing this message, you need to add a router trait to your application")
+
+  def getRouteFor(request: HttpRequest): HttpResponse | String

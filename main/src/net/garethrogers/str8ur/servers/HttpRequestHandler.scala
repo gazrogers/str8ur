@@ -12,11 +12,12 @@ import io.netty.util.CharsetUtil
 import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.Queue
-import net.garethrogers.str8ur.routers.Router
+import net.garethrogers.str8ur.Str8urApp
 import net.garethrogers.str8ur.HttpRequestWithBody
 import net.garethrogers.str8ur.HttpRequestNoBody
+import java.util.Calendar
 
-class HttpRequestHandler(router: Router) extends SimpleChannelInboundHandler[FullHttpRequest]:
+class HttpRequestHandler(app: Str8urApp) extends SimpleChannelInboundHandler[FullHttpRequest]:
   override def channelReadComplete(ctx: ChannelHandlerContext): Unit =
     ctx.flush
 
@@ -28,17 +29,14 @@ class HttpRequestHandler(router: Router) extends SimpleChannelInboundHandler[Ful
       val tempVal = headers.getOrElse(requestHeader.getKey, Queue.empty[String])
       headers.update(requestHeader.getKey, tempVal.enqueue(requestHeader.getValue))
     }
-    val myReq = if request.content.readableBytes > 0 then
-      router.getRouteFor(request.uri)(HttpRequestWithBody(request.uri, headers, request.content.toString(CharsetUtil.UTF_8)))
-      "l" // HttpRequestWithBody(request.uri, headers, request.content.toString(CharsetUtil.UTF_8))
+    val str8urRequest = if request.content.readableBytes > 0 then
+      HttpRequestWithBody(request.uri, headers, request.content.toString(CharsetUtil.UTF_8))
     else
-      router.getRouteFor(request.uri)(HttpRequestNoBody(request.uri, headers))
-      "s" // HttpRequestNoBody(request.uri, headers)
-    // Call into the framework here
-    // val myResponse = str8ur(myReq)
-    // Currently just spitting out the created internal request object
-    val content = Unpooled.copiedBuffer(myReq.toString, CharsetUtil.UTF_8)
-    val response = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content)
+      HttpRequestNoBody(request.uri, headers)
+    val myResponse = app.handleRequest(str8urRequest)
+    val content = Unpooled.copiedBuffer(myResponse.body, CharsetUtil.UTF_8)
+    println("[" + Calendar.getInstance.getTime + "]: " + request.uri + ", " + HttpResponseStatus.valueOf(myResponse.code))
+    val response = DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(myResponse.code), content)
     ctx.writeAndFlush(response)
     ctx.close
 

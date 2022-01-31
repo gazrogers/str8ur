@@ -6,4 +6,10 @@ object main extends ScalaModule {
   def ivyDeps = Agg(
     ivy"io.netty:netty-all:4.1.72.Final"
   )
+
+  object test extends Tests with TestModule.ScalaTest {
+    def ivyDeps = Agg(
+      ivy"org.scalatest::scalatest:3.2.10"
+    )
+  }
 }

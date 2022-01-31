@@ -1,15 +1,17 @@
 package net.garethrogers.exampleapp
 
+import net.garethrogers.exampleapp.controllers.*
+
 import net.garethrogers.str8ur.Str8urApp
 import net.garethrogers.str8ur.servers.NettyHttpServer
 import net.garethrogers.str8ur.routers.DefaultRouter
-import net.garethrogers.str8ur.Controller
-
-class TestController(val x: Int) extends Controller
 
 class Example(port: Int) extends Str8urApp(port) with NettyHttpServer with DefaultRouter:
-  println("Top level Example code")
-  addController(TestController(8))
+  def initApp = 
+    addControllers(
+      TestController1(),
+      TestController2(4)
+    )
 
 object Example:
   @main def main(args: String*) =
@@ -19,4 +21,4 @@ object Example:
       else
         8080
 
-    new Example(port)
+    Example(port)
