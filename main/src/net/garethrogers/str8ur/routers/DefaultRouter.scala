@@ -8,13 +8,14 @@ import scala.collection.immutable.Queue
 import java.lang.reflect.Modifier
 import java.lang.reflect.Method
 import net.garethrogers.str8ur.httperrors.NotFound
+import scala.collection.mutable.ListBuffer
 
-trait DefaultRouter() extends Router:
+class DefaultRouter:
   type Route = (Controller, Method, Int)
 
   private lazy val routerControllerMap = HashMap.empty[String, Route]
 
-  override def initRouter: Unit =
+  def initRouter: Unit =
     println(routerControllerMap)
 
   def getRouteFor(request: HttpRequest): HttpResponse | String =
@@ -53,7 +54,7 @@ trait DefaultRouter() extends Router:
    * 
    *  @param passedControllers the controllers to scan for routes
    */
-  def addControllers(passedControllers: => Controller*): Unit =
+  def addControllers(passedControllers: => ListBuffer[Controller]): Unit =
     passedControllers.foreach(controller =>
       val classDef = controller.getClass
       val cName = classDef.getSimpleName.toLowerCase

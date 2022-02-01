@@ -6,8 +6,8 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import net.garethrogers.str8ur.Str8urApp
 
-trait NettyHttpServer extends Server:
-  override def start(port: Int, app: Str8urApp): Unit =
+class NettyHttpServer:
+  def start(port: Int, app: Str8urApp): Unit =
     val bossGroup = NioEventLoopGroup()
     val workerGroup = NioEventLoopGroup()
     try
