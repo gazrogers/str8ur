@@ -59,7 +59,9 @@ class DefaultRouter:
       val classDef = controller.getClass
       val cName = classDef.getSimpleName.toLowerCase
       classDef.getDeclaredMethods.foreach(method =>
-        if Modifier.isPublic(method.getModifiers) && method.getReturnType == classOf[HttpResponse] then
+        if Modifier.isPublic(method.getModifiers)
+          && (method.getReturnType == classOf[HttpResponse]
+          || method.getReturnType == classOf[String]) then
           val routePrefix = '/' + cName + '/' + method.getName.toLowerCase
           val paramTypes = method.getParameterTypes.dropRight(1)
           if paramTypes.forall(_ == classOf[String]) then
