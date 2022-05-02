@@ -10,13 +10,10 @@ import java.lang.reflect.Method
 import net.garethrogers.str8ur.httperrors.NotFound
 import scala.collection.mutable.ListBuffer
 
-class DefaultRouter:
+class ContrActRouter:
   type Route = (Controller, Method, Int)
 
   private lazy val routerControllerMap = HashMap.empty[String, Route]
-
-  def initRouter: Unit =
-    println(routerControllerMap)
 
   def getRouteFor(request: HttpRequest): HttpResponse | String =
     val (controller, action, params) = splitUrl(request.url)
@@ -60,8 +57,8 @@ class DefaultRouter:
       val cName = classDef.getSimpleName.toLowerCase
       classDef.getDeclaredMethods.foreach(method =>
         if Modifier.isPublic(method.getModifiers)
-          && (method.getReturnType == classOf[HttpResponse]
-          || method.getReturnType == classOf[String]) then
+            && (method.getReturnType == classOf[HttpResponse]
+            || method.getReturnType == classOf[String]) then
           val routePrefix = '/' + cName + '/' + method.getName.toLowerCase
           val paramTypes = method.getParameterTypes.dropRight(1)
           if paramTypes.forall(_ == classOf[String]) then

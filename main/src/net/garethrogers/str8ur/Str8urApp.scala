@@ -6,7 +6,7 @@ import scala.collection.immutable.Queue
 
 abstract class Str8urApp(val port: Int, config: Config):
   config.router.addControllers(config.controllers)
-  config.server.start(port, this.asInstanceOf[Str8urApp])
+  config.server.start(port, this)
 
   def handleRequest(request: HttpRequest): HttpResponse =
     config.router.getRouteFor(request) match
