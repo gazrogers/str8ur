@@ -13,8 +13,7 @@ import scala.jdk.CollectionConverters.*
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.Queue
 import net.garethrogers.str8ur.Str8urApp
-import net.garethrogers.str8ur.HttpRequestWithBody
-import net.garethrogers.str8ur.HttpRequestNoBody
+import net.garethrogers.str8ur.HttpRequest
 import java.util.Calendar
 
 class HttpRequestHandler(app: Str8urApp) extends SimpleChannelInboundHandler[FullHttpRequest]:
@@ -26,13 +25,15 @@ class HttpRequestHandler(app: Str8urApp) extends SimpleChannelInboundHandler[Ful
       ctx.write(DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE))
     val headers = HashMap.empty[String, Queue[String]]
     request.headers.entries.asScala.foreach { requestHeader =>
+      // Java MapEntries are shit. I can't find a nice way of doing this.
       val tempVal = headers.getOrElse(requestHeader.getKey, Queue.empty[String])
       headers.update(requestHeader.getKey, tempVal.enqueue(requestHeader.getValue))
     }
-    val str8urRequest = if request.content.readableBytes > 0 then
-      HttpRequestWithBody(request.uri, headers, request.content.toString(CharsetUtil.UTF_8))
-    else
-      HttpRequestNoBody(request.uri, headers)
+    val str8urRequest = HttpRequest(
+      request.uri,
+      headers,
+      if request.content.readableBytes > 0 then request.content.toString(CharsetUtil.UTF_8) else ""
+    )
     val myResponse = app.handleRequest(str8urRequest)
     val content = Unpooled.copiedBuffer(myResponse.body, CharsetUtil.UTF_8)
     println("[" + Calendar.getInstance.getTime + "]: " + request.uri + ", " + HttpResponseStatus.valueOf(myResponse.code))
